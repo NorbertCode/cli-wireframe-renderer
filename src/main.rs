@@ -24,6 +24,18 @@ fn subtract_points(a: &SpacePoint, b: &SpacePoint) -> SpacePoint {
     add_points(&a, &negate_point(&b))
 }
 
+fn rotate_point_around_center(point: &SpacePoint, angle_degrees_clockwise: f64) -> SpacePoint {
+    let angle_radians: f64 = -angle_degrees_clockwise * std::f64::consts::PI / 180.0;
+    let angle_sin: f64 = angle_radians.sin();
+    let angle_cos: f64 = angle_radians.cos();
+
+    SpacePoint {
+        x: (point.x * angle_cos) + (point.z * angle_sin),
+        y: point.y,
+        z: (-point.x * angle_sin) + (point.z * angle_cos),
+    }
+}
+
 struct Camera { 
     // By default at rotation (0,0,0)
     position: SpacePoint,
@@ -36,7 +48,7 @@ fn perspective_projection(point: &SpacePoint, camera: &Camera) -> SpacePoint {
     let camera_coordinate_point = SpacePoint {
         x: (camera.focal_length * camera_transform.x) / camera_transform.z,
         y: (camera.focal_length * camera_transform.y) / camera_transform.z,
-        z: camera_transform.z,
+        z: camera_transform.z, // Remember z position
     };
 
     camera_coordinate_point
@@ -44,24 +56,16 @@ fn perspective_projection(point: &SpacePoint, camera: &Camera) -> SpacePoint {
 
 fn main() {
     let camera = Camera {
-        position: SpacePoint { x: 0.0, y: 0.0, z: 0.0 },
+        position: SpacePoint { x: 0.0, y: 0.0, z: -5.0 },
         focal_length: 1.0,
     };
 
     let point1 = SpacePoint {x: 1.0, y: 3.0, z: 3.0};
     let screen_point1: SpacePoint = perspective_projection(&point1, &camera);
-
-    let point2 = SpacePoint {x: 1.0, y: 0.0, z: 3.0};
-    let screen_point2: SpacePoint = perspective_projection(&point2, &camera);
-
-    let point3 = SpacePoint {x: 1.0, y: 3.0, z: 6.0};
-    let screen_point3: SpacePoint = perspective_projection(&point3, &camera);
-
-    let point4 = SpacePoint {x: 1.0, y: 0.0, z: 6.0};
-    let screen_point4: SpacePoint = perspective_projection(&point4, &camera);
+    let rotated_point1: SpacePoint = rotate_point_around_center(&point1, -45.0);
+    let rotated_screen_point1: SpacePoint = perspective_projection(&rotated_point1, &camera);
 
     println!("({}, {})", screen_point1.x, screen_point1.y);
-    println!("({}, {})", screen_point2.x, screen_point2.y);
-    println!("({}, {})", screen_point3.x, screen_point3.y);
-    println!("({}, {})", screen_point4.x, screen_point4.y);
+    println!("({}, {}, {})", rotated_point1.x, rotated_point1.y, rotated_point1.z);
+    println!("({}, {})", rotated_screen_point1.x, rotated_screen_point1.y)
 }
