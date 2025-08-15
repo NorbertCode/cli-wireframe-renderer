@@ -5,15 +5,22 @@ struct SpacePoint {
 }
 
 struct Camera { 
-    // By default at position (0,0,0) and rotation (0,0,0)
+    // By default at rotation (0,0,0)
+    position: SpacePoint,
     focal_length: f64,
 }
 
 fn perspective_projection(point: &SpacePoint, camera: &Camera) -> SpacePoint {
+    let camera_transform = SpacePoint {
+        x: point.x - camera.position.x,
+        y: point.y - camera.position.y,
+        z: point.z - camera.position.z
+    };
+
     let camera_coordinate_point = SpacePoint {
-        x: (camera.focal_length * point.x) / point.z,
-        y: (camera.focal_length * point.y) / point.z,
-        z: point.z,
+        x: (camera.focal_length * camera_transform.x) / camera_transform.z,
+        y: (camera.focal_length * camera_transform.y) / camera_transform.z,
+        z: camera_transform.z,
     };
 
     camera_coordinate_point
@@ -21,6 +28,7 @@ fn perspective_projection(point: &SpacePoint, camera: &Camera) -> SpacePoint {
 
 fn main() {
     let camera = Camera {
+        position: SpacePoint { x: 0.0, y: 0.0, z: 0.0 },
         focal_length: 1.0,
     };
 
