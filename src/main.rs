@@ -4,6 +4,26 @@ struct SpacePoint {
     z: f64,
 }
 
+fn negate_point(point: &SpacePoint) -> SpacePoint {
+    SpacePoint {
+        x: -point.x,
+        y: -point.y,
+        z: -point.z,
+    }
+}
+
+fn add_points(a: &SpacePoint, b: &SpacePoint) -> SpacePoint {
+    SpacePoint {
+        x: a.x - b.x,
+        y: a.y + b.y,
+        z: a.z + b.z,
+    }
+}
+
+fn subtract_points(a: &SpacePoint, b: &SpacePoint) -> SpacePoint {
+    add_points(&a, &negate_point(&b))
+}
+
 struct Camera { 
     // By default at rotation (0,0,0)
     position: SpacePoint,
@@ -11,11 +31,7 @@ struct Camera {
 }
 
 fn perspective_projection(point: &SpacePoint, camera: &Camera) -> SpacePoint {
-    let camera_transform = SpacePoint {
-        x: point.x - camera.position.x,
-        y: point.y - camera.position.y,
-        z: point.z - camera.position.z
-    };
+    let camera_transform: SpacePoint = subtract_points(point, &camera.position);
 
     let camera_coordinate_point = SpacePoint {
         x: (camera.focal_length * camera_transform.x) / camera_transform.z,
