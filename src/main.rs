@@ -24,7 +24,7 @@ fn subtract_points(a: &SpacePoint, b: &SpacePoint) -> SpacePoint {
     add_points(&a, &negate_point(&b))
 }
 
-fn rotate_point_around_center(point: &SpacePoint, angle_degrees_clockwise: f64) -> SpacePoint {
+fn rotate_point_around_origin(point: &SpacePoint, angle_degrees_clockwise: f64) -> SpacePoint {
     let angle_radians: f64 = -angle_degrees_clockwise * std::f64::consts::PI / 180.0;
     let angle_sin: f64 = angle_radians.sin();
     let angle_cos: f64 = angle_radians.cos();
@@ -34,6 +34,13 @@ fn rotate_point_around_center(point: &SpacePoint, angle_degrees_clockwise: f64) 
         y: point.y,
         z: (-point.x * angle_sin) + (point.z * angle_cos),
     }
+}
+
+fn rotate_point(point: &SpacePoint, origin: &SpacePoint, angle_degrees_clockwise: f64) -> SpacePoint {
+    let mut centered_point: SpacePoint = subtract_points(point, origin);
+    centered_point = rotate_point_around_origin(&centered_point, angle_degrees_clockwise);
+
+    add_points(&centered_point, &origin)
 }
 
 struct Camera { 
@@ -62,7 +69,7 @@ fn main() {
 
     let point1 = SpacePoint {x: 1.0, y: 3.0, z: 3.0};
     let screen_point1: SpacePoint = perspective_projection(&point1, &camera);
-    let rotated_point1: SpacePoint = rotate_point_around_center(&point1, -45.0);
+    let rotated_point1: SpacePoint = rotate_point_around_origin(&point1, -45.0);
     let rotated_screen_point1: SpacePoint = perspective_projection(&rotated_point1, &camera);
 
     println!("({}, {})", screen_point1.x, screen_point1.y);
