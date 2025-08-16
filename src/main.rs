@@ -29,7 +29,7 @@ fn subtract_points(a: &SpacePoint, b: &SpacePoint) -> SpacePoint {
 }
 
 fn rotate_point_around_origin(point: &SpacePoint, angle_degrees_clockwise: f64) -> SpacePoint {
-    let angle_radians: f64 = degrees_to_radians(-angle_degrees_clockwise);
+    let angle_radians: f64 = degrees_to_radians(angle_degrees_clockwise);
     let angle_sin: f64 = angle_radians.sin();
     let angle_cos: f64 = angle_radians.cos();
 
@@ -144,7 +144,7 @@ fn main() {
 
                 let this_point = ScreenPoint { x: x, y: y };
                 if screen_points.contains(&this_point) {
-                    print!("-");
+                    print!(".");
                 }
                 else {
                     print!(" ");
