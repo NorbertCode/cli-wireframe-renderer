@@ -57,6 +57,7 @@ struct Camera {
     height_px: i32,
 }
 
+#[derive(PartialEq, Eq)]
 struct ScreenPoint {
     x: i32,
     y: i32,
@@ -104,28 +105,60 @@ fn main() {
         position: SpacePoint { x: 0.0, y: 0.0, z: -5.0 },
         focal_length: 1.0,
         vertical_fov: 60.0,
-        width_px: 32,
+        width_px: 64,
         height_px: 32,
     };
 
-    println!("{} x {}", get_camera_space_dimensions(&camera).x, get_camera_space_dimensions(&camera).y);
-    
-    let projected_point = SpacePoint {
+    let rotation_origin = SpacePoint {
         x: 0.0,
         y: 0.0,
-        z: 0.0,
+        z: 5.0,
     };
-    println!("({}, {})", get_screen_point(&projected_point, &camera).x, get_screen_point(&projected_point, &camera).y);
-    // let point1 = SpacePoint {x: 1.0, y: 3.0, z: 3.0};
-    // let projected_point1: SpacePoint = perspective_projection(&point1, &camera);
-    // let rotated_point1: SpacePoint = rotate_point_around_origin(&point1, -45.0);
-    // let rotated_projected_point1: SpacePoint = perspective_projection(&rotated_point1, &camera);
-    // let screen_point1: ScreenPoint = get_screen_point(&projected_point1, &camera);
-    // let rotated_screen_point1: ScreenPoint = get_screen_point(&rotated_projected_point1, &camera);
 
-    // println!("({}, {})", projected_point1.x, projected_point1.y);
-    // println!("({}, {}, {})", rotated_point1.x, rotated_point1.y, rotated_point1.z);
-    // println!("({}, {})", rotated_projected_point1.x, rotated_projected_point1.y);
-    // println!("({}, {})", screen_point1.x, screen_point1.y);
-    // println!("({}, {})", rotated_screen_point1.x, rotated_screen_point1.y);
+    let points: Vec<SpacePoint> = vec![
+        SpacePoint { x: 3.0, y: 3.0, z: 8.0},
+        SpacePoint { x: 3.0, y: 3.0, z: 2.0},
+        SpacePoint { x: 3.0, y: -3.0, z: 8.0},
+        SpacePoint { x: 3.0, y: -3.0, z: 2.0},
+        SpacePoint { x: -3.0, y: 3.0, z: 8.0},
+        SpacePoint { x: -3.0, y: 3.0, z: 2.0},
+        SpacePoint { x: -3.0, y: -3.0, z: 8.0},
+        SpacePoint { x: -3.0, y: -3.0, z: 2.0},
+    ];
+    let mut screen_points: Vec<ScreenPoint> = vec![];
+    let mut degrees: f64 = 0.0;
+
+    loop {
+        screen_points.clear();
+        for i in 0..points.len() {
+            let projected_point: SpacePoint = perspective_projection(&rotate_point(&points[i], &rotation_origin, degrees), &camera);
+            screen_points.push(get_screen_point(&projected_point, &camera));
+        }
+
+        for y in 0..camera.height_px + 2 {
+            for x in 0..camera.width_px + 2 {
+                if x == 0 || x == camera.width_px + 1 || y == 0 || y == camera.height_px + 1 {
+                    print!("#");
+                    continue;
+                }
+
+                let this_point = ScreenPoint { x: x, y: y };
+                if screen_points.contains(&this_point) {
+                    print!("-");
+                }
+                else {
+                    print!(" ");
+                }
+            }
+            print!("\n");
+        }
+        
+        std::thread::sleep(std::time::Duration::from_millis(10));
+        print!("\x1B[2J\x1B[1;1H");
+
+        degrees += 1.0;
+        if degrees >= 360.0 {
+            degrees = 0.0;
+        }
+    }
 }
