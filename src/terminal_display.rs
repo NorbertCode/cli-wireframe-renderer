@@ -2,11 +2,10 @@ use crate::camera::Camera;
 use crate::point::SpacePoint;
 use crate::shape::Shape;
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub struct ScreenPoint {
     pub x: i32,
     pub y: i32,
-    pub z_index: i32,
 }
 
 pub struct TerminalDisplay {
@@ -14,7 +13,7 @@ pub struct TerminalDisplay {
     pub height: i32,
     pub frame_time_millis: u64,
     
-    pub vertex_char: char,
+    pub edge_char: char,
 }
 
 impl TerminalDisplay {
@@ -34,9 +33,44 @@ impl TerminalDisplay {
 
         let camera_space_dimensions = camera.get_camera_space_dimensions();
         for shape in shapes {
+            let mut vertices: Vec<ScreenPoint> = vec![];
             for point in &shape.points {
-                let screen_point: ScreenPoint = self.get_screen_point(&camera.perspective_projection(&point), camera_space_dimensions);
-                display[screen_point.y as usize][screen_point.x as usize] = self.vertex_char;
+                vertices.push(self.get_screen_point(&camera.perspective_projection(&point), camera_space_dimensions));
+            }
+
+            for edge in &shape.edges {
+                let dx: i32 = (vertices[edge.1].x - vertices[edge.0].x).abs();
+                let dy: i32 = (vertices[edge.1].y - vertices[edge.0].y).abs();
+
+                let sx: i32 = if vertices[edge.0].x < vertices[edge.1].x { 1 } else { -1 };
+                let sy: i32 = if vertices[edge.0].y < vertices[edge.1].y { 1 } else { -1 };
+
+                let mut err: i32 = dx - dy;
+
+                let mut x: i32 = vertices[edge.0].x;
+                let mut y: i32 = vertices[edge.0].y;
+
+                // Weird workaround to check if it actually reaches the endpoint
+                let mut updated_dx: i32 = dx;
+                let mut prev_dx: i32;
+                loop {
+                    prev_dx = updated_dx;
+                    updated_dx = (vertices[edge.1].x - x).abs(); 
+                    if (x == vertices[edge.1].x && y == vertices[edge.1].y) || updated_dx > prev_dx || x < 0 || x >= self.width || y < 0 || y >= self.height {
+                        break;
+                    }
+
+                    display[y as usize][x as usize] = self.edge_char;
+
+                    if 2 * err > -dy {
+                        err -= dy;
+                        x += sx;
+                    }
+                    if 2 * err < dx {
+                        err += dx;
+                        y += sy;
+                    }
+                }
             }
         }
 
@@ -56,7 +90,6 @@ impl TerminalDisplay {
         let mut screen_point = ScreenPoint {
             x: (projected_point.x / camera_space_dimensions.0 * (self.width as f64)).round() as i32,
             y: (projected_point.y / camera_space_dimensions.1 * (self.height as f64)).round() as i32,
-            z_index: projected_point.z.round() as i32,
         };
         screen_point.x += self.width / 2;
         screen_point.y += self.height / 2;

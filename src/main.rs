@@ -22,6 +22,15 @@ fn main() {
             SpacePoint { x: -3.0, y: -3.0, z: 8.0},
             SpacePoint { x: -3.0, y: -3.0, z: 2.0},
         ],
+        edges: vec![
+            (0, 1), (0, 2), (0, 4),
+            (1, 3), (1, 5),
+            (2, 3), (2, 6),
+            (3, 7),
+            (4, 5), (4, 6),
+            (5, 7),
+            (6, 7),
+        ],
         origin: SpacePoint { x: 0.0, y: 0.0, z: 5.0 },
     };
     let mut shapes = vec![rect];
@@ -37,7 +46,7 @@ fn main() {
         width: 64,
         height: 32,
         frame_time_millis: 10,
-        vertex_char: 'O',
+        edge_char: '*',
     };
 
     display.display_loop(&mut shapes, &camera);

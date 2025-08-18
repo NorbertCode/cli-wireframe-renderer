@@ -2,6 +2,7 @@ use crate::point::SpacePoint;
 
 pub struct Shape {
     pub points: Vec<SpacePoint>,
+    pub edges: Vec<(usize, usize)>, // Pairs of indexes of points
     pub origin: SpacePoint,
 }
 
