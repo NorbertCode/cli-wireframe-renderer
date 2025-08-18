@@ -1,4 +1,4 @@
-use super::util;
+use crate::util;
 
 pub struct SpacePoint {
     pub x: f64,
