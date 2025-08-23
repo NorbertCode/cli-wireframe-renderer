@@ -17,15 +17,10 @@ pub struct TerminalDisplay {
 }
 
 impl TerminalDisplay {
-    pub fn display_loop(&self, shapes: &mut Vec<Shape>, camera: &Camera) {
-        loop {
-            TerminalDisplay::print_display(self.draw_shapes(&shapes, &camera));
-            for shape in shapes.iter_mut() {
-                shape.rotate(1.0);
-            }
-            std::thread::sleep(std::time::Duration::from_millis(self.frame_time_millis));
-            print!("\x1B[2J\x1B[1;1H");
-        }
+    pub fn display_loop_iteration(&self, shapes: &mut Vec<Shape>, camera: &Camera) {
+        TerminalDisplay::print_display(self.draw_shapes(&shapes, &camera));
+        std::thread::sleep(std::time::Duration::from_millis(self.frame_time_millis));
+        print!("\x1B[2J\x1B[1;1H");
     } 
 
     pub fn draw_shapes(&self, shapes: &Vec<Shape>, camera: &Camera) -> Vec<Vec<char>> {

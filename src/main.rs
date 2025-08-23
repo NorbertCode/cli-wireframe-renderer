@@ -49,5 +49,10 @@ fn main() {
         edge_char: '*',
     };
 
-    display.display_loop(&mut shapes, &camera);
+    loop {
+        for shape in shapes.iter_mut() {
+            shape.rotate(1.0);
+        }
+        display.display_loop_iteration(&mut shapes, &camera);
+    }
 }
