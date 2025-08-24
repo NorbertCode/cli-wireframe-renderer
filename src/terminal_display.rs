@@ -1,5 +1,5 @@
 use crate::camera::Camera;
-use crate::point::SpacePoint;
+use crate::vector3f::Vector3f;
 use crate::shape::Shape;
 
 #[derive(PartialEq, Eq, Clone, Copy)]
@@ -81,7 +81,7 @@ impl TerminalDisplay {
         }
     }
 
-    fn get_screen_point(&self, projected_point: &SpacePoint, camera_space_dimensions: (f64, f64)) -> ScreenPoint {
+    fn get_screen_point(&self, projected_point: &Vector3f, camera_space_dimensions: (f64, f64)) -> ScreenPoint {
         let mut screen_point = ScreenPoint {
             x: (projected_point.x / camera_space_dimensions.0 * (self.width as f64)).round() as i32,
             y: (projected_point.y / camera_space_dimensions.1 * (self.height as f64)).round() as i32,

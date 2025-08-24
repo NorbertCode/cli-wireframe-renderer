@@ -1,10 +1,10 @@
 mod util;
-mod point;
+mod vector3f;
 mod shape;
 mod camera;
 mod terminal_display;
 
-use point::SpacePoint;
+use vector3f::Vector3f;
 use shape::Shape;
 use camera::Camera;
 
@@ -13,14 +13,14 @@ use crate::terminal_display::TerminalDisplay;
 fn main() {
     let rect = Shape {
         points: vec![
-            SpacePoint { x: 3.0, y: 3.0, z: 8.0},
-            SpacePoint { x: 3.0, y: 3.0, z: 2.0},
-            SpacePoint { x: 3.0, y: -3.0, z: 8.0},
-            SpacePoint { x: 3.0, y: -3.0, z: 2.0},
-            SpacePoint { x: -3.0, y: 3.0, z: 8.0},
-            SpacePoint { x: -3.0, y: 3.0, z: 2.0},
-            SpacePoint { x: -3.0, y: -3.0, z: 8.0},
-            SpacePoint { x: -3.0, y: -3.0, z: 2.0},
+            Vector3f { x: 3.0, y: 3.0, z: 8.0},
+            Vector3f { x: 3.0, y: 3.0, z: 2.0},
+            Vector3f { x: 3.0, y: -3.0, z: 8.0},
+            Vector3f { x: 3.0, y: -3.0, z: 2.0},
+            Vector3f { x: -3.0, y: 3.0, z: 8.0},
+            Vector3f { x: -3.0, y: 3.0, z: 2.0},
+            Vector3f { x: -3.0, y: -3.0, z: 8.0},
+            Vector3f { x: -3.0, y: -3.0, z: 2.0},
         ],
         edges: vec![
             (0, 1), (0, 2), (0, 4),
@@ -31,12 +31,12 @@ fn main() {
             (5, 7),
             (6, 7),
         ],
-        origin: SpacePoint { x: 0.0, y: 0.0, z: 5.0 },
+        origin: Vector3f { x: 0.0, y: 0.0, z: 5.0 },
     };
     let mut shapes = vec![rect];
 
     let camera = Camera {
-        position: SpacePoint { x: 0.0, y: 0.0, z: -6.0 },
+        position: Vector3f { x: 0.0, y: 0.0, z: -6.0 },
         focal_length: 1.0,
         vertical_fov: 60.0,
         aspect_ratio: 2.0,
@@ -51,7 +51,7 @@ fn main() {
 
     loop {
         for shape in shapes.iter_mut() {
-            shape.rotate((1.0, 1.0, 1.0));
+            shape.rotate(&Vector3f { x: 1.0, y: 1.0, z: 1.0 });
         }
         display.display_loop_iteration(&mut shapes, &camera);
     }
