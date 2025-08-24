@@ -26,7 +26,27 @@ impl TerminalDisplay {
     pub fn draw_shapes(&self, shapes: &Vec<Shape>, camera: &Camera) -> Vec<Vec<char>> {
         let mut display = vec![vec![' '; self.width as usize]; self.height as usize];
 
+        let edge_points: Vec<ScreenPoint> = self.get_edge_screen_points(shapes, camera);
+        for point in edge_points {
+            display[point.y as usize][point.x as usize] = self.edge_char;
+        }
+
+        display
+    }
+
+    fn print_display(display_vector: Vec<Vec<char>>) {
+        for row in display_vector {
+            for chr in row {
+                print!("{}", chr);
+            }
+            print!("\n");
+        }
+    }
+
+    fn get_edge_screen_points(&self, shapes: &Vec<Shape>, camera: &Camera) -> Vec<ScreenPoint> {
+        let mut points_to_draw: Vec<ScreenPoint> = vec![];
         let camera_space_dimensions = camera.get_camera_space_dimensions();
+
         for shape in shapes {
             let mut vertices: Vec<ScreenPoint> = vec![];
             for point in &shape.points {
@@ -55,7 +75,7 @@ impl TerminalDisplay {
                         break;
                     }
 
-                    display[y as usize][x as usize] = self.edge_char;
+                    points_to_draw.push(ScreenPoint { x, y });
 
                     if 2 * err > -dy {
                         err -= dy;
@@ -69,16 +89,7 @@ impl TerminalDisplay {
             }
         }
 
-        display
-    }
-
-    fn print_display(display_vector: Vec<Vec<char>>) {
-        for row in display_vector {
-            for chr in row {
-                print!("{}", chr);
-            }
-            print!("\n");
-        }
+        points_to_draw
     }
 
     fn get_screen_point(&self, projected_point: &Vector3f, camera_space_dimensions: (f64, f64)) -> ScreenPoint {
