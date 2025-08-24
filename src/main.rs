@@ -37,6 +37,7 @@ fn main() {
 
     let camera = Camera {
         position: Vector3f { x: 0.0, y: 0.0, z: -6.0 },
+        rotation: Vector3f { x: 0.0, y: 0.0, z: 0.0 },
         focal_length: 1.0,
         vertical_fov: 60.0,
         aspect_ratio: 2.0,
