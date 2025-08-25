@@ -1,5 +1,8 @@
+use serde::Deserialize;
+
 use crate::util;
 
+#[derive(Deserialize)]
 pub struct Vector3f {
     pub x: f64,
     pub y: f64,

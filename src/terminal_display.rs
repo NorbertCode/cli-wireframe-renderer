@@ -1,3 +1,5 @@
+use serde::Deserialize;
+
 use crate::camera::Camera;
 use crate::vector3f::Vector3f;
 use crate::shape::Shape;
@@ -8,6 +10,7 @@ pub struct ScreenPoint {
     pub y: i32,
 }
 
+#[derive(Deserialize)]
 pub struct TerminalDisplay {
     pub width: i32,
     pub height: i32,
@@ -54,24 +57,24 @@ impl TerminalDisplay {
             }
 
             for edge in &shape.edges {
-                let dx: i32 = (vertices[edge.1].x - vertices[edge.0].x).abs();
-                let dy: i32 = (vertices[edge.1].y - vertices[edge.0].y).abs();
+                let dx: i32 = (vertices[edge.end].x - vertices[edge.start].x).abs();
+                let dy: i32 = (vertices[edge.end].y - vertices[edge.start].y).abs();
 
-                let sx: i32 = if vertices[edge.0].x < vertices[edge.1].x { 1 } else { -1 };
-                let sy: i32 = if vertices[edge.0].y < vertices[edge.1].y { 1 } else { -1 };
+                let sx: i32 = if vertices[edge.start].x < vertices[edge.end].x { 1 } else { -1 };
+                let sy: i32 = if vertices[edge.start].y < vertices[edge.end].y { 1 } else { -1 };
 
                 let mut err: i32 = dx - dy;
 
-                let mut x: i32 = vertices[edge.0].x;
-                let mut y: i32 = vertices[edge.0].y;
+                let mut x: i32 = vertices[edge.start].x;
+                let mut y: i32 = vertices[edge.start].y;
 
                 // Weird workaround to check if it actually reaches the endpoint
                 let mut updated_dx: i32 = dx;
                 let mut prev_dx: i32;
                 loop {
                     prev_dx = updated_dx;
-                    updated_dx = (vertices[edge.1].x - x).abs(); 
-                    if (x == vertices[edge.1].x && y == vertices[edge.1].y) || updated_dx > prev_dx || x < 0 || x >= self.width || y < 0 || y >= self.height {
+                    updated_dx = (vertices[edge.end].x - x).abs(); 
+                    if (x == vertices[edge.end].x && y == vertices[edge.end].y) || updated_dx > prev_dx || x < 0 || x >= self.width || y < 0 || y >= self.height {
                         break;
                     }
 

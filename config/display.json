@@ -1,0 +1,23 @@
+{
+    "camera": {
+        "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -6.0
+        },
+        "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "focal_length": 1.0,
+        "vertical_fov": 60.0,
+        "aspect_ratio": 2.0
+    },
+    "terminal_display": {
+        "width": 96,
+        "height": 48,
+        "frame_time_millis": 10,
+        "edge_char": "*"
+    }
+}

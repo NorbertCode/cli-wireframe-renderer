@@ -1,8 +1,17 @@
+use serde::Deserialize;
+
 use crate::vector3f::Vector3f;
 
+#[derive(Deserialize)]
+pub struct Edge {
+    pub start: usize,
+    pub end: usize,
+}
+
+#[derive(Deserialize)]
 pub struct Shape {
     pub points: Vec<Vector3f>,
-    pub edges: Vec<(usize, usize)>, // Pairs of indexes of points
+    pub edges: Vec<Edge>, // Pairs of indexes of points
     pub origin: Vector3f,
 }
 

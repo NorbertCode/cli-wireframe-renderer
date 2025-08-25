@@ -7,48 +7,25 @@ mod terminal_display;
 use vector3f::Vector3f;
 use shape::Shape;
 use camera::Camera;
-
-use crate::terminal_display::TerminalDisplay;
+use terminal_display::TerminalDisplay;
 
 fn main() {
-    let rect = Shape {
-        points: vec![
-            Vector3f { x: 3.0, y: 3.0, z: 8.0},
-            Vector3f { x: 3.0, y: 3.0, z: 2.0},
-            Vector3f { x: 3.0, y: -3.0, z: 8.0},
-            Vector3f { x: 3.0, y: -3.0, z: 2.0},
-            Vector3f { x: -3.0, y: 3.0, z: 8.0},
-            Vector3f { x: -3.0, y: 3.0, z: 2.0},
-            Vector3f { x: -3.0, y: -3.0, z: 8.0},
-            Vector3f { x: -3.0, y: -3.0, z: 2.0},
-        ],
-        edges: vec![
-            (0, 1), (0, 2), (0, 4),
-            (1, 3), (1, 5),
-            (2, 3), (2, 6),
-            (3, 7),
-            (4, 5), (4, 6),
-            (5, 7),
-            (6, 7),
-        ],
-        origin: Vector3f { x: 0.0, y: 0.0, z: 5.0 },
-    };
-    let mut shapes = vec![rect];
+    const SHAPES_CONFIG_PATH: &str = "./config/shapes.json";
+    const DISPLAY_CONFIG_PATH: &str = "./config/display.json";
 
-    let camera = Camera {
-        position: Vector3f { x: 0.0, y: 0.0, z: -6.0 },
-        rotation: Vector3f { x: 0.0, y: 0.0, z: 0.0 },
-        focal_length: 1.0,
-        vertical_fov: 60.0,
-        aspect_ratio: 2.0,
-    };
+    let shapes_config: String = std::fs::read_to_string(SHAPES_CONFIG_PATH)
+        .expect("Should be able to read ./config/shapes.json");
+    let display_config: String = std::fs::read_to_string(DISPLAY_CONFIG_PATH)
+        .expect("Should be able to read ./config/display.json");
+    let parsed_display_config: serde_json::Value = serde_json::from_str(&display_config)
+        .expect("Should be able to pare ./config/display.json");
 
-    let display = TerminalDisplay {
-        width: 96,
-        height: 48,
-        frame_time_millis: 10,
-        edge_char: '*',
-    };
+    let mut shapes: Vec<Shape> = serde_json::from_str(&shapes_config)
+        .expect("Should be able to parse ./config/shapes.json");
+    let camera: Camera = serde_json::from_value(parsed_display_config["camera"].clone())
+        .expect("Should be able to parse camera from ./config/display.json");
+    let display: TerminalDisplay = serde_json::from_value(parsed_display_config["terminal_display"].clone())
+        .expect("Should be able to parse terminal_display from ./config/display.json");
 
     loop {
         for shape in shapes.iter_mut() {

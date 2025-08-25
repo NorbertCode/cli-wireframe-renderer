@@ -1,6 +1,9 @@
+use serde::Deserialize;
+
 use crate::vector3f::Vector3f;
 use crate::util;
 
+#[derive(Deserialize)]
 pub struct Camera { 
     pub position: Vector3f,
     pub rotation: Vector3f,
