@@ -37,7 +37,7 @@ impl Vector3f {
         centered_point.add(&origin)
     }
 
-    fn rotate_point_around_origin(&self, angle_degrees_clockwise: &Vector3f) -> Vector3f {
+    pub fn rotate_point_around_origin(&self, angle_degrees_clockwise: &Vector3f) -> Vector3f {
         let angle_rad = Vector3f {
             x: util::degrees_to_radians(angle_degrees_clockwise.x),
             y: util::degrees_to_radians(angle_degrees_clockwise.y),

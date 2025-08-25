@@ -27,8 +27,12 @@ fn main() {
         .expect("Should be able to parse ./config/shapes.json");
     let mut camera: Camera = serde_json::from_value(parsed_display_config["camera"].clone())
         .expect("Should be able to parse camera from ./config/display.json");
-    let display: TerminalDisplay = serde_json::from_value(parsed_display_config["terminal_display"].clone())
+    let mut display: TerminalDisplay = serde_json::from_value(parsed_display_config["terminal_display"].clone())
         .expect("Should be able to parse terminal_display from ./config/display.json");
+
+    display.width = crossterm::terminal::window_size().expect("Can't read window size").columns as i32;
+    display.height = crossterm::terminal::window_size().expect("Can't read window size").rows as i32;
+    camera.aspect_ratio = display.width as f64 / display.height as f64;
 
     let mut stdout = std::io::stdout();
     let (tx, rx) = mpsc::channel();
@@ -69,21 +73,22 @@ fn main() {
                     camera_position_transform.y += 1.0;
                 },
                 KeyCode::Up => {
-                    camera_rotation_transform.x += 1.0;
+                    camera_rotation_transform.x += 5.0;
                 }
                 KeyCode::Down => {
-                    camera_rotation_transform.x -= 1.0;
+                    camera_rotation_transform.x -= 5.0;
                 }
                 KeyCode::Left => {
-                    camera_rotation_transform.y -= 1.0;
+                    camera_rotation_transform.y -= 5.0;
                 }
                 KeyCode::Right => {
-                    camera_rotation_transform.y += 1.0;
+                    camera_rotation_transform.y += 5.0;
                 }
                 _ => {}
             }
         }
 
+        camera_position_transform = camera_position_transform.rotate_point_around_origin(&camera.rotation);
         camera.position = camera.position.add(&camera_position_transform);
         camera.rotation = camera.rotation.add(&camera_rotation_transform);
 
