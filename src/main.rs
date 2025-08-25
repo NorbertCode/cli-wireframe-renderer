@@ -4,6 +4,7 @@ mod shape;
 mod camera;
 mod terminal_display;
 
+use crossterm::ExecutableCommand;
 use vector3f::Vector3f;
 use shape::Shape;
 use camera::Camera;
@@ -27,10 +28,13 @@ fn main() {
     let display: TerminalDisplay = serde_json::from_value(parsed_display_config["terminal_display"].clone())
         .expect("Should be able to parse terminal_display from ./config/display.json");
 
+    let mut stdout = std::io::stdout();
+    stdout.execute(crossterm::cursor::Hide).unwrap();
+
     loop {
         for shape in shapes.iter_mut() {
             shape.rotate(&Vector3f { x: 1.0, y: 1.0, z: 1.0 });
         }
-        display.display_loop_iteration(&mut shapes, &camera);
+        display.display_loop_iteration(&mut shapes, &camera, &mut stdout);
     }
 }
