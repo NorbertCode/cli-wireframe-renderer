@@ -4,7 +4,9 @@ mod shape;
 mod camera;
 mod terminal_display;
 
-use crossterm::ExecutableCommand;
+use std::{io, sync::mpsc, thread, time::Duration};
+
+use crossterm::event::{self, poll, read, Event, KeyCode};
 use vector3f::Vector3f;
 use shape::Shape;
 use camera::Camera;
@@ -23,18 +25,69 @@ fn main() {
 
     let mut shapes: Vec<Shape> = serde_json::from_str(&shapes_config)
         .expect("Should be able to parse ./config/shapes.json");
-    let camera: Camera = serde_json::from_value(parsed_display_config["camera"].clone())
+    let mut camera: Camera = serde_json::from_value(parsed_display_config["camera"].clone())
         .expect("Should be able to parse camera from ./config/display.json");
     let display: TerminalDisplay = serde_json::from_value(parsed_display_config["terminal_display"].clone())
         .expect("Should be able to parse terminal_display from ./config/display.json");
 
     let mut stdout = std::io::stdout();
-    stdout.execute(crossterm::cursor::Hide).unwrap();
+    let (tx, rx) = mpsc::channel();
+
+    thread::spawn(move || {
+        loop {
+            crossterm::terminal::enable_raw_mode();
+            if event::poll(Duration::from_millis(500)).unwrap() {
+                if let Event::Key(key_event) = event::read().unwrap() {
+                    tx.send(key_event).unwrap();
+                }
+            }
+        }
+    });
 
     loop {
-        for shape in shapes.iter_mut() {
-            shape.rotate(&Vector3f { x: 1.0, y: 1.0, z: 1.0 });
+        let mut camera_position_transform = Vector3f { x: 0.0, y: 0.0, z: 0.0 };
+        let mut camera_rotation_transform = Vector3f { x: 0.0, y: 0.0, z: 0.0 };
+
+        if let Ok(key_event) = rx.try_recv() {
+            match key_event.code {
+                KeyCode::Char('w') => {
+                    camera_position_transform.z += 1.0;
+                },
+                KeyCode::Char('s') => {
+                    camera_position_transform.z -= 1.0;
+                },
+                KeyCode::Char('a') => {
+                    camera_position_transform.x -= 1.0;
+                },
+                KeyCode::Char('d') => {
+                    camera_position_transform.x += 1.0;
+                },
+                KeyCode::Char('q') => {
+                    camera_position_transform.y -= 1.0;
+                },
+                KeyCode::Char('e') => {
+                    camera_position_transform.y += 1.0;
+                },
+                KeyCode::Up => {
+                    camera_rotation_transform.x += 1.0;
+                }
+                KeyCode::Down => {
+                    camera_rotation_transform.x -= 1.0;
+                }
+                KeyCode::Left => {
+                    camera_rotation_transform.y -= 1.0;
+                }
+                KeyCode::Right => {
+                    camera_rotation_transform.y += 1.0;
+                }
+                _ => {}
+            }
         }
+
+        camera.position = camera.position.add(&camera_position_transform);
+        camera.rotation = camera.rotation.add(&camera_rotation_transform);
+
+        crossterm::terminal::disable_raw_mode().unwrap();
         display.display_loop_iteration(&mut shapes, &camera, &mut stdout);
     }
 }

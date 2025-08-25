@@ -24,7 +24,7 @@ impl TerminalDisplay {
     pub fn display_loop_iteration(&self, shapes: &mut Vec<Shape>, camera: &Camera, stdout: &mut std::io::Stdout) {
         TerminalDisplay::print_display(self.draw_shapes(&shapes, &camera));
         std::thread::sleep(std::time::Duration::from_millis(self.frame_time_millis));
-        stdout.execute(crossterm::cursor::MoveToColumn(0)).unwrap();
+        stdout.execute(crossterm::cursor::MoveTo(0, 0)).unwrap();
         stdout.execute(crossterm::terminal::Clear(crossterm::terminal::ClearType::All)).unwrap();
     } 
 
