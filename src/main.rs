@@ -4,13 +4,23 @@ mod shape;
 mod camera;
 mod terminal_display;
 
-use std::{io, sync::mpsc, thread, time::Duration};
+use std::{io, panic, sync::mpsc, thread, time::Duration};
 
-use crossterm::event::{self, poll, read, Event, KeyCode};
+use crossterm::{event::{self, Event, KeyCode, poll, read}, terminal};
 use vector3f::Vector3f;
 use shape::Shape;
 use camera::Camera;
 use terminal_display::TerminalDisplay;
+
+fn setup_failsafe() {
+    let original_hook = panic::take_hook();
+
+    panic::set_hook(Box::new(move |panic_info| {
+            let _ = terminal::disable_raw_mode();
+            original_hook(panic_info);
+        }
+    ));
+}
 
 fn main() {
     const SHAPES_CONFIG_PATH: &str = "./config/shapes.json";
@@ -37,10 +47,13 @@ fn main() {
     let mut stdout = std::io::stdout();
     let (tx, rx) = mpsc::channel();
 
+    setup_failsafe();
+
+    crossterm::terminal::enable_raw_mode().expect("Failed to enter raw mode");
+
     thread::spawn(move || {
         loop {
-            crossterm::terminal::enable_raw_mode();
-            if event::poll(Duration::from_millis(500)).unwrap() {
+            if event::poll(Duration::from_millis(50)).unwrap() {
                 if let Event::Key(key_event) = event::read().unwrap() {
                     tx.send(key_event).unwrap();
                 }
@@ -48,42 +61,23 @@ fn main() {
         }
     });
 
-    loop {
+    'core_loop: loop {
         let mut camera_position_transform = Vector3f { x: 0.0, y: 0.0, z: 0.0 };
         let mut camera_rotation_transform = Vector3f { x: 0.0, y: 0.0, z: 0.0 };
 
-        if let Ok(key_event) = rx.try_recv() {
+        while let Ok(key_event) = rx.try_recv() {
             match key_event.code {
-                KeyCode::Char('w') => {
-                    camera_position_transform.z += 1.0;
-                },
-                KeyCode::Char('s') => {
-                    camera_position_transform.z -= 1.0;
-                },
-                KeyCode::Char('a') => {
-                    camera_position_transform.x -= 1.0;
-                },
-                KeyCode::Char('d') => {
-                    camera_position_transform.x += 1.0;
-                },
-                KeyCode::Char('q') => {
-                    camera_position_transform.y -= 1.0;
-                },
-                KeyCode::Char('e') => {
-                    camera_position_transform.y += 1.0;
-                },
-                KeyCode::Up => {
-                    camera_rotation_transform.x += 5.0;
-                }
-                KeyCode::Down => {
-                    camera_rotation_transform.x -= 5.0;
-                }
-                KeyCode::Left => {
-                    camera_rotation_transform.y -= 5.0;
-                }
-                KeyCode::Right => {
-                    camera_rotation_transform.y += 5.0;
-                }
+                KeyCode::Char('w') => camera_position_transform.z += 1.0,
+                KeyCode::Char('s') => camera_position_transform.z -= 1.0,
+                KeyCode::Char('a') => camera_position_transform.x -= 1.0,
+                KeyCode::Char('d') => camera_position_transform.x += 1.0,
+                KeyCode::Char('q') => camera_position_transform.y -= 1.0,
+                KeyCode::Char('e') => camera_position_transform.y += 1.0,
+                KeyCode::Up => camera_rotation_transform.x += 5.0,
+                KeyCode::Down => camera_rotation_transform.x -= 5.0,
+                KeyCode::Left => camera_rotation_transform.y -= 5.0,
+                KeyCode::Right => camera_rotation_transform.y += 5.0,
+                KeyCode::Esc => break 'core_loop,
                 _ => {}
             }
         }
@@ -92,7 +86,8 @@ fn main() {
         camera.position = camera.position.add(&camera_position_transform);
         camera.rotation = camera.rotation.add(&camera_rotation_transform);
 
-        crossterm::terminal::disable_raw_mode().unwrap();
         display.display_loop_iteration(&mut shapes, &camera, &mut stdout);
     }
+
+    crossterm::terminal::disable_raw_mode().expect("Failed to disable raw mode");
 }
