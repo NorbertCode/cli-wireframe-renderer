@@ -4,7 +4,7 @@ mod shape;
 mod camera;
 mod terminal_display;
 
-use std::{io, panic, sync::mpsc, thread, time::Duration};
+use std::{io, panic, sync::mpsc, thread, time::{Duration, Instant}};
 
 use crossterm::{event::{self, Event, KeyCode, poll, read}, terminal};
 use vector3f::Vector3f;
@@ -44,6 +44,8 @@ fn main() {
     display.height = crossterm::terminal::window_size().expect("Can't read window size").rows as i32;
     camera.aspect_ratio = display.width as f64 / display.height as f64;
 
+    let target_frame_time = Duration::from_millis(16); // 60 fps
+
     let mut stdout = std::io::stdout();
     let (tx, rx) = mpsc::channel();
 
@@ -62,6 +64,8 @@ fn main() {
     });
 
     'core_loop: loop {
+        let frame_start = Instant::now();
+
         let mut camera_position_transform = Vector3f { x: 0.0, y: 0.0, z: 0.0 };
         let mut camera_rotation_transform = Vector3f { x: 0.0, y: 0.0, z: 0.0 };
 
@@ -87,6 +91,11 @@ fn main() {
         camera.rotation = camera.rotation.add(&camera_rotation_transform);
 
         display.display_loop_iteration(&mut shapes, &camera, &mut stdout);
+
+        let elapsed = frame_start.elapsed();
+        if elapsed < target_frame_time {
+            thread::sleep(target_frame_time - elapsed);
+        }
     }
 
     crossterm::terminal::disable_raw_mode().expect("Failed to disable raw mode");
