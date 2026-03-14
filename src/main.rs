@@ -4,9 +4,9 @@ mod shape;
 mod camera;
 mod terminal_display;
 
-use std::{io, panic, sync::mpsc, thread, time::{Duration, Instant}};
+use std::{panic, sync::mpsc, thread, time::{Duration, Instant}};
 
-use crossterm::{event::{self, Event, KeyCode, poll, read}, terminal};
+use crossterm::{event::{self, Event, KeyCode}, terminal};
 use vector3f::Vector3f;
 use shape::Shape;
 use camera::Camera;
@@ -37,14 +37,8 @@ fn main() {
         .expect("Should be able to parse ./config/shapes.json");
     let mut camera: Camera = serde_json::from_value(parsed_display_config["camera"].clone())
         .expect("Should be able to parse camera from ./config/display.json");
-    let mut display: TerminalDisplay = serde_json::from_value(parsed_display_config["terminal_display"].clone())
+    let display: TerminalDisplay = serde_json::from_value(parsed_display_config["terminal_display"].clone())
         .expect("Should be able to parse terminal_display from ./config/display.json");
-
-    display.width = crossterm::terminal::window_size().expect("Can't read window size").columns as i32;
-    display.height = crossterm::terminal::window_size().expect("Can't read window size").rows as i32;
-    camera.aspect_ratio = display.width as f64 / display.height as f64;
-
-    let target_frame_time = Duration::from_millis(16); // 60 fps
 
     let mut stdout = std::io::stdout();
     let (tx, rx) = mpsc::channel();
@@ -64,7 +58,7 @@ fn main() {
     });
 
     let mut previous_time = Instant::now();
-    let mut current_time = previous_time;
+    let mut current_time: Instant;
 
     'core_loop: loop {
         current_time = Instant::now();
@@ -99,11 +93,6 @@ fn main() {
         }
 
         display.display_loop_iteration(&mut shapes, &camera, &mut stdout);
-
-        let elapsed = current_time.elapsed();
-        if elapsed < target_frame_time {
-            thread::sleep(target_frame_time - elapsed);
-        }
 
         previous_time = current_time;
     }
