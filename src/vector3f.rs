@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use crate::util;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Copy)]
 pub struct Vector3f {
     pub x: f64,
     pub y: f64,
@@ -28,6 +28,14 @@ impl Vector3f {
 
     pub fn subtract(&self, other: &Vector3f) -> Vector3f {
         self.add(&other.negate())
+    }
+
+    pub fn multiply(&self, multiplier: f64) -> Vector3f {
+        Vector3f { 
+            x: self.x * multiplier,
+            y: self.y * multiplier,
+            z: self.z * multiplier
+        }
     }
 
     pub fn rotate_point(&self, origin: &Vector3f, angle_degrees_clockwise: &Vector3f) -> Vector3f {
