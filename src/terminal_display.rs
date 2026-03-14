@@ -40,12 +40,16 @@ impl TerminalDisplay {
     }
 
     fn print_display(display_vector: Vec<Vec<char>>) {
+        let mut frame = String::with_capacity((display_vector.len() * display_vector[0].len()) + (display_vector.len() * 2));
+
         for row in display_vector {
             for chr in row {
-                print!("{}", chr);
+                frame.push(chr);
             }
-            print!("\n");
+            frame.push_str("\r\n");
         }
+
+        print!("{}", frame);
     }
 
     fn get_edge_screen_points(&self, shapes: &Vec<Shape>, camera: &Camera) -> Vec<ScreenPoint> {
