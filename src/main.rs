@@ -63,8 +63,12 @@ fn main() {
         }
     });
 
+    let mut previous_time = Instant::now();
+    let mut current_time = previous_time;
+
     'core_loop: loop {
-        let frame_start = Instant::now();
+        current_time = Instant::now();
+        let delta_time = (current_time - previous_time).as_secs_f64();
 
         let mut camera_position_transform = Vector3f { x: 0.0, y: 0.0, z: 0.0 };
         let mut camera_rotation_transform = Vector3f { x: 0.0, y: 0.0, z: 0.0 };
@@ -90,12 +94,18 @@ fn main() {
         camera.position = camera.position.add(&camera_position_transform);
         camera.rotation = camera.rotation.add(&camera_rotation_transform);
 
+        for shape in &mut shapes.iter_mut() {
+            shape.update(delta_time);
+        }
+
         display.display_loop_iteration(&mut shapes, &camera, &mut stdout);
 
-        let elapsed = frame_start.elapsed();
+        let elapsed = current_time.elapsed();
         if elapsed < target_frame_time {
             thread::sleep(target_frame_time - elapsed);
         }
+
+        previous_time = current_time;
     }
 
     crossterm::terminal::disable_raw_mode().expect("Failed to disable raw mode");
