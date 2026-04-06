@@ -15,7 +15,7 @@
 
 ## Overview
 
-<img width="30%" align="right" src="https://github.com/user-attachments/assets/342646fb-fc51-4eba-a5e0-149ed3ecda44" />
+<img width="30%" align="right" src="docs/assets/cube.gif" />
 
 <i>CLI Wireframe Renderer</i> is a program which simulates a 3D space, projects it onto a 2D screen and renders it as a wireframe on your terminal.
 
@@ -44,7 +44,7 @@ The program, besides projecting and rendering the 3D space in your terminal, all
 
 You can control your camera and the program using:
 
-<img width="45%" align="right" src="https://github.com/user-attachments/assets/3494e8f8-c6af-44ec-be9e-3c25bb8e048a" />
+<img width="45%" align="right" src="docs/assets/triangle.gif" />
 
 Key | Action 
 --- | ---
@@ -86,7 +86,7 @@ Configuration files reside in `config/` and there are two of them.
         },
         "focal_length": 1.0,
         "vertical_fov": 60.0,
-        "aspect_ratio": 2.0
+        "aspect_ratio": 1.0
     },
     "terminal_display": {
         "width": 96,
@@ -105,7 +105,7 @@ The `camera` field allows setting the default properties of the camera, which ar
 
 It also provides `focal_length`, `vertical_fov` (degrees) and `aspect_ratio`, which are fixed for the entire duration of the program and cannot be changed during execution.
 
-In order for the display to look correctly the aspect ratio should be set to the display's $\frac{width}{height}$.
+In order for the display to look correctly the aspect ratio should be set to `1`.
 
 #### Terminal Display
 

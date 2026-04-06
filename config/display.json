@@ -12,7 +12,7 @@
         },
         "focal_length": 1.0,
         "vertical_fov": 60.0,
-        "aspect_ratio": 2.0
+        "aspect_ratio": 1.0
     },
     "terminal_display": {
         "width": 96,
